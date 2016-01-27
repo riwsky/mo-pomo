@@ -6,7 +6,7 @@
   "denied")
 
 (defonce notifications
-  (atom (= "granted" (get-permission)))
+  (atom (= "granted" (get-permission))))
 
 (when (= "default" (get-permission))
   "default" (.requestPermission js/Notification #(reset! notifications (= % "granted"))))
