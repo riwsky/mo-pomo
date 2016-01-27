@@ -1,8 +1,14 @@
 (ns pomo.notifications)
 
-(defonce notifications (atom (= "granted" (.-permission js/Notification))))
+(defn get-permission []
+  (or (if-let [Notification (.-Notification js/window)]
+        (.-permission Notification)))
+  "denied")
 
-(when (= "default" (.-permission js/Notification))
+(defonce notifications
+  (atom (= "granted" (get-permission)))
+
+(when (= "default" (get-permission))
   "default" (.requestPermission js/Notification #(reset! notifications (= % "granted"))))
 
 (defn notify
