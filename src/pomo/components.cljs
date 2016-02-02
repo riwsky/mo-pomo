@@ -25,15 +25,28 @@
 (defn fmtsecs [secs]
   (gstring/format "%02d:%02d" (quot secs 60) (rem secs 60)))
 
+(defn now []
+  (let [date (.-Date js/window)]
+    (date.)))
+
+(defn swap-to [data]
+  (fn [to]
+    (let [ws (assoc @data :state to)
+          xs (if (= :play to)
+               (assoc ws :since (now))
+               ws)]
+      #(reset! data xs)
+      )
+    ))
+
 (defn pomo-ui [data]
   (sab/html [:div.ui.container
              [:h1 (fmtsecs (:seconds @data))]
              [:div#buttons
               (let [state (:state @data)
                     next-states (state visible-states)
-                    on-click (fn [to] #(swap! data assoc-in [:state] to))
-                    buttons (map #(button % (on-click %)) next-states)
-                    ]
+                    on-click (swap-to data)
+                    buttons (map #(button % (on-click %)) next-states)]
                 buttons
                 )
               ]]))
