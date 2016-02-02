@@ -1,5 +1,5 @@
 (ns pomo.core
-  (:require [pomo.components :refer [pomo-ui]]
+  (:require [pomo.components :refer [pomo-ui fmtsecs]]
             [pomo.audio :refer [play-sound]]
             [pomo.notifications :refer [notify]]))
 
@@ -25,6 +25,13 @@
                 1000))
 
 (defonce tick-interval-id (tick-down app-state))
+
+(defn update-title [to]
+  (aset js/document "title" to))
+
+(add-watch app-state :update-title (fn [_ _ _ {s :seconds}]
+                                     (update-title (fmtsecs s))))
+
 
 (add-watch app-state :times-up (fn [_ _ {olds :seconds} {news :seconds st :state}]
                                  (when (and (= olds 0) (= news -1))
