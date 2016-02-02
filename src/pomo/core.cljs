@@ -1,22 +1,27 @@
 (ns pomo.core
-  (:require [pomo.components :refer [pomo-ui fmtsecs]]
+  (:require [pomo.components :refer [pomo-ui fmtsecs now]]
             [pomo.audio :refer [play-sound]]
             [pomo.notifications :refer [notify]]))
 
 (def DEFAULT_SECONDS (* 60 25))
+(def BREAK_SECONDS (* 60 5))
+(def SECONDS {:play DEFAULT_SECONDS :break BREAK_SECONDS})
 
 (enable-console-print!)
 
-(defonce app-state (atom {:state :stop :seconds DEFAULT_SECONDS}))
+(defonce app-state (atom {:state :stop :seconds DEFAULT_SECONDS :since (now)}))
 
 (defn render! []
   (.render js/React
            (pomo-ui app-state)
            (.getElementById js/document "app")))
 
-(defn decrease-if-play [{:keys [state seconds] :as d}]
+(defn decrease-if-play [{:keys [state seconds since] :as d}]
   (if (#{:play :break} state)
-    (update-in d [:seconds] dec)
+    (let [millis-passed (- (.getTime (now)) (.getTime since))
+          secs-passed (/ millis-passed 1000)
+          secs-remaining (- (state SECONDS) secs-passed)]
+      (assoc d :seconds secs-remaining))
     d)
   )
 
@@ -34,14 +39,14 @@
 
 
 (add-watch app-state :times-up (fn [_ _ {olds :seconds} {news :seconds st :state}]
-                                 (when (and (= olds 0) (= news -1))
+                                 (when (and (>= olds 0) (< news 0))
                                    (play-sound)
                                    (let [copy {:play ["pomodoro complete!" :break (* 60 5)]
                                                :break ["break complete!" :stop DEFAULT_SECONDS]}
                                          [notification-title next-state next-seconds] (st copy)
                                          ]
                                      (notify notification-title)
-                                     (reset! app-state {:state next-state :seconds next-seconds})
+                                     (reset! app-state {:state next-state :seconds next-seconds :since (now)})
                                      )
                                    )))
 
