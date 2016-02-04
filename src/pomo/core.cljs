@@ -23,8 +23,8 @@
 (defn update-title [to]
   (aset js/document "title" to))
 
-(add-watch app-state :update-title (fn [_ _ _ {s :seconds}]
-                                     (update-title (fmtsecs s))))
+(add-watch app-state :update-title (fn [_ _ _ n]
+                                     (update-title (fmtsecs (model/seconds-remaining s)))))
 
 (add-watch app-state :times-up (fn [_ _ o n]
                                  (when (and (>= (model/seconds-remaining o) 0) (< (model/seconds-remaining n) 0))
