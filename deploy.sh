@@ -4,7 +4,7 @@
 set -e
 
 git checkout gh-pages
-git merge master
+git rebase master
 rm resources/public/cljs/main.js
 lein cljsbuild once prod
 git add -f resources/public/cljs/main.js
