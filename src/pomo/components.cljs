@@ -2,6 +2,7 @@
   (:require [sablono.core :as sab]
             [clojure.string :as string]
             [pomo.audio :as audio]
+            [pomo.model :as model]
             [goog.string :as gstring]
             [goog.string.format]
             )
@@ -25,27 +26,16 @@
 (defn fmtsecs [secs]
   (gstring/format "%02d:%02d" (quot secs 60) (rem secs 60)))
 
-(defn now []
-  (let [date (.-Date js/window)]
-    (date.)))
-
-(defn swap-to [data]
-  (fn [to]
-    (let [ws (assoc @data :state to)
-          xs (if (= :play to)
-               (assoc ws :since (now))
-               ws)]
-      #(reset! data xs)
-      )
-    ))
+(defn swap-to [data to]
+  #(swap! data (to model/fns)))
 
 (defn pomo-ui [data]
   (sab/html [:div.ui.container
-             [:h1 (fmtsecs (:seconds @data))]
+             [:h1 (fmtsecs (model/seconds-remaining @data))]
              [:div#buttons
               (let [state (:state @data)
                     next-states (state visible-states)
-                    on-click (swap-to data)
+                    on-click (partial swap-to data)
                     buttons (map #(button % (on-click %)) next-states)]
                 buttons
                 )
