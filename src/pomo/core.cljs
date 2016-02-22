@@ -34,7 +34,7 @@
                                          [notification-title next-state] ((:state n) copy)
                                          ]
                                      (notify notification-title)
-                                     (swap! app-state assoc :state next-state)
+                                     (swap! app-state (comp (model/fns next-state) #(assoc % :already 0)))
                                      )
                                    )))
 
