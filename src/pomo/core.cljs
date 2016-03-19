@@ -1,6 +1,9 @@
 (ns pomo.core
   (:require [pomo.components :refer [pomo-ui fmtsecs]]
             [pomo.audio :refer [play-sound]]
+            [goog.events :as events]
+            [goog.events.EventType]
+            [goog.events.KeyCodes]
             [pomo.model :as model]
             [pomo.notifications :refer [notify]]))
 
@@ -46,3 +49,8 @@
 
 
 (render!)
+
+(events/listen (aget (.getElementsByTagName js/document "body") 0)
+               goog.events.EventType.KEYPRESS
+               #(when (= goog.events.KeyCodes.SPACE (.-charCode %))
+                  (swap! app-state model/toggle)))
