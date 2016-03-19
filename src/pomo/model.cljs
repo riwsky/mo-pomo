@@ -25,6 +25,12 @@
 (defn pause [data]
   (assoc data :state :pause :since (:current data) :already (seconds-passed data)))
 
+(defn toggle [{s :state :as data}]
+  ((s {:play pause
+       :pause play
+       :stop play
+       :break stop}) data))
+
 
 (defn seconds-remaining [{s :state :as data}]
   (let [total-seconds (or (s TOTAL_SECONDS) (* 60 25) s)
